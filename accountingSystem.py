@@ -25,10 +25,16 @@ def show_all_transactions(transactions, account):
         print(f"{date}: {amount}")
 
 def show_expenses_on_date(transactions, account, date):
+    if not date.isdigit() or len(date) != 8:
+        print("Invalid date format. Use YYYYMMDD.")
+        return
     total = sum(amount for d, amount in transactions.get(account, []) if d == date)
     print(f"Total expenses on {date} for {account}: {total}")
 
 def show_daily_average_expenses(transactions, account, year_month):
+    if not year_month.isdigit() or len(year_month) != 6:
+        print("Invalid month format. Use YYYYMM.")
+        return
     daily_expenses = defaultdict(int)
     days = set()
     for date, amount in transactions.get(account, []):
@@ -41,30 +47,38 @@ def show_daily_average_expenses(transactions, account, year_month):
 def main():
     transactions = load_transactions("input.txt")
     while True:
-        print("\n1. Show total expenses")
-        print("2. Show all transactions")
-        print("3. Show expenses on a specific day")
-        print("4. Show daily average expenses on a specific month")
-        print("5. Exit")
-        choice = input("Enter choice: ")
-
-        if choice == '5':
+        account = input("Enter ID or Q to quit: ")
+        if account.upper() == 'Q':
             print("Exiting...")
             break
+        elif account not in transactions:
+            print("Invalid ID. Try again.")
+            continue
         
-        account = input("Enter account number: ")
-        if choice == '1':
-            show_total_expenses(transactions, account)
-        elif choice == '2':
-            show_all_transactions(transactions, account)
-        elif choice == '3':
-            date = input("Enter date (YYYYMMDD): ")
-            show_expenses_on_date(transactions, account, date)
-        elif choice == '4':
-            year_month = input("Enter year and month (YYYYMM): ")
-            show_daily_average_expenses(transactions, account, year_month)
-        else:
-            print("Invalid choice. Try again.")
+        print(f"Welcome {account}")
+        while True:
+            print("\nEnter command:")
+            print("1) A Show total expenses")
+            print("2) B Show all transactions")
+            print("3) C Show expenses on a specific day")
+            print("4) D Show daily average expenses on a specific month")
+            print("5) Q Exit system")
+            
+            choice = input("Enter choice: ").upper()
+            if choice == 'Q':
+                break
+            elif choice == 'A':
+                show_total_expenses(transactions, account)
+            elif choice == 'B':
+                show_all_transactions(transactions, account)
+            elif choice == 'C':
+                date = input("Enter date (YYYYMMDD): ")
+                show_expenses_on_date(transactions, account, date)
+            elif choice == 'D':
+                year_month = input("Enter year and month (YYYYMM): ")
+                show_daily_average_expenses(transactions, account, year_month)
+            else:
+                print("Invalid command. Try again.")
 
 if __name__ == "__main__":
     main()
