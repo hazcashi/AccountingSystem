@@ -4,7 +4,6 @@ from collections import defaultdict
 import io
 import sys
 
-# 匯入要測試的函式
 from accountingSystem import (
     load_transactions,
     show_total_expenses,
@@ -17,8 +16,9 @@ from accountingSystem import (
 class TestAccountingSystemUnit(unittest.TestCase):
     """
     這個測試類別包含了對所有函式的單元測試 (Unit Tests)。
-    Unit Test Planning 耗時: 1 小時
-    Docstring writing 耗時: 20 分鐘
+    Unit Test Planning 耗時: 50 分鐘
+    Docstring writing 耗時: 15 分鐘
+    Code writing 耗時: 85 分鐘
     """
 
     def test_load_transactions(self):
@@ -38,7 +38,6 @@ userB 20230201 300
         with patch("builtins.open", mock_open(read_data=mock_file_data)):
             result = load_transactions("fakefile.txt")
 
-        # 預期 userA 與 userB 的資料正確被讀取
         self.assertIn("userA", result)
         self.assertIn("userB", result)
         self.assertEqual(len(result["userA"]), 2)
@@ -68,7 +67,6 @@ userB 20230201 300
         sys.stdout = sys.__stdout__
         output_value = captured_output.getvalue().strip()
 
-        # 驗證輸出是否包含正確總花費
         self.assertIn("300", output_value)
 
     def test_show_all_transactions(self):
@@ -92,7 +90,6 @@ userB 20230201 300
         sys.stdout = sys.__stdout__
         output_value = captured_output.getvalue()
 
-        # 應按照日期排序後輸出
         self.assertIn("20230101: 100", output_value)
         self.assertIn("20230102: 200", output_value)
 
@@ -117,7 +114,6 @@ userB 20230201 300
         sys.stdout = sys.__stdout__
         output_value = captured_output.getvalue()
 
-        # 該日期總和應為 250
         self.assertIn("250", output_value)
 
     def test_show_expenses_on_date_invalid_date(self):
@@ -136,7 +132,6 @@ userB 20230201 300
         captured_output = io.StringIO()
         sys.stdout = captured_output
 
-        # 測試一個日期格式不符合 YYYYMMDD
         show_expenses_on_date(transactions, "userA", "2023-01-01")
 
         sys.stdout = sys.__stdout__
@@ -160,12 +155,10 @@ userB 20230201 300
         captured_output = io.StringIO()
         sys.stdout = captured_output
 
-        # 測試 202301 (1 月) 的日平均 (兩天: 150 與 200)
         show_daily_average_expenses(transactions, "userA", "202301")
 
         sys.stdout = sys.__stdout__
         output_value = captured_output.getvalue()
-        # (150 + 200) / 2 = 175.00
         self.assertIn("175.00", output_value)
 
     def test_show_daily_average_expenses_invalid_month(self):
@@ -194,18 +187,15 @@ userB 20230201 300
 class TestAccountingSystemIntegration(unittest.TestCase):
     """
     這個測試類別包含了對系統整體流程的整合測試 (Integration Tests)。
-    Integration Test Planning 耗時: 30 分鐘
-    Docstring writing 耗時: 10 分鐘
+    Integration Test Planning 耗時: 45 分鐘
+    Docstring writing 耗時: 15 分鐘
+    Code writing 耗時: 50 分鐘
     """
 
     @patch('builtins.input', side_effect=[
-        # 第一次輸入 - 使用者名稱
         'userA',
-        # Main Menu 選擇 -> A (Show total expenses)
         'A',
-        # Main Menu 選擇 -> Q 離開系統
         'Q',
-        # 再次輸入 -> Q (完整離開)
         'Q'
     ])
     def test_integration_flow_total_expenses(self, mock_input):
@@ -231,19 +221,13 @@ userB 20230201 300
             sys.stdout = sys.__stdout__
             output_value = captured_output.getvalue()
 
-        # 確認有顯示 userA 的總花費 300
         self.assertIn("Total expenses for userA: 300", output_value)
 
     @patch('builtins.input', side_effect=[
-        # 第一次輸入 - 錯誤的使用者名稱
         'xyz',
-        # 再次輸入 - 正確的使用者名稱 userB
         'userB',
-        # Main Menu 選擇 -> B (Show all transactions)
         'B',
-        # Main Menu 選擇 -> Q (Exit system)
         'Q',
-        # 最後整體離開
         'Q'
     ])
     def test_integration_flow_show_all_transactions(self, mock_input):
@@ -269,9 +253,7 @@ userB 20230103 300
             sys.stdout = sys.__stdout__
             output_value = captured_output.getvalue()
 
-        # 確認有顯示 "Invalid ID" (因為 xyz 不存在)
         self.assertIn("Invalid ID. Try again.", output_value)
-        # 確認有顯示 userB 的所有交易 (sorted by date)
         self.assertIn("20230102: 200", output_value)
         self.assertIn("20230103: 300", output_value)
 
